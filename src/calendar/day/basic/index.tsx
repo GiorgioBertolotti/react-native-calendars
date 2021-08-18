@@ -2,13 +2,19 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 
 import React, {Component, Fragment} from 'react';
-import {TouchableOpacity, Text, View} from 'react-native';
+import {Platform, TouchableOpacity as IosTouchableOpacity, Text, View} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 
 import {Theme, DateData, DayState} from '../../../types';
 // @ts-expect-error
 import {shouldUpdate} from '../../../component-updater';
 import styleConstructor from './style';
 import Marking, {MarkingTypes, MarkingProps} from '../marking';
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  android: AndroidTouchableOpacity
+});
 
 export interface BasicDayProps {
   state?: DayState;

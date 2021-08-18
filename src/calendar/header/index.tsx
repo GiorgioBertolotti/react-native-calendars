@@ -4,7 +4,9 @@ import memoize from 'memoize-one';
 import XDate from 'xdate';
 
 import React, {Component, Fragment, ReactNode} from 'react';
-import {ActivityIndicator, Platform, View, Text, TouchableOpacity, Image, StyleProp, ViewStyle, AccessibilityActionEvent, ColorValue} from 'react-native';
+import {ActivityIndicator, Platform, View, Text, TouchableOpacity as IosTouchableOpacity, Image, StyleProp, ViewStyle, AccessibilityActionEvent, ColorValue} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
+
 // @ts-expect-error
 import {shouldUpdate} from '../../component-updater';
 // @ts-expect-error
@@ -19,6 +21,11 @@ import {
 } from '../../testIDs';
 import styleConstructor from './style';
 import {Theme, Direction} from '../../types';
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  android: AndroidTouchableOpacity
+});
 
 interface Props {
   theme?: Theme;

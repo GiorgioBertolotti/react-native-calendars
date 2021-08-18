@@ -2,7 +2,8 @@ import PropTypes from 'prop-types';
 import XDate from 'xdate';
 
 import React, {Component} from 'react';
-import {StyleSheet, Animated, TouchableOpacity, View, StyleProp, ViewStyle} from 'react-native';
+import {StyleSheet, Animated, Platform, TouchableOpacity as IosTouchableOpacity, View, StyleProp, ViewStyle} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 
 // @ts-expect-error
 import {toMarkingFormat} from '../../interface';
@@ -15,6 +16,11 @@ import Presenter from './Presenter';
 const commons = require('../commons');
 const updateSources = commons.UpdateSources;
 const TOP_POSITION = 65;
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  android: AndroidTouchableOpacity
+});
 
 interface Props {
   /** Initial date in 'yyyy-MM-dd' format. Default = Date() */

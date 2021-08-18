@@ -2,7 +2,8 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 
 import React, {Component} from 'react';
-import {TouchableWithoutFeedback, Text, View, ViewStyle} from 'react-native';
+import {Platform, TouchableWithoutFeedback as IosTouchableWithoutFeedback, Text, View, ViewStyle} from 'react-native';
+import {TouchableWithoutFeedback as AndroidTouchableWithoutFeedback} from 'react-native-gesture-handler';
 
 // @ts-expect-error
 import {shouldUpdate} from '../../../component-updater';
@@ -11,6 +12,11 @@ import styleConstructor from './style';
 import Dot from '../dot';
 import {MarkingProps} from '../marking';
 import {Theme, DayState} from '../../../types';
+
+const TouchableWithoutFeedback = Platform.select({
+  ios: IosTouchableWithoutFeedback,
+  android: AndroidTouchableWithoutFeedback
+});
 
 interface PeriodDayProps {
   state?: DayState;
