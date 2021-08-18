@@ -13,11 +13,6 @@ import Dot from '../dot';
 import {MarkingProps} from '../marking';
 import {Theme, DayState} from '../../../types';
 
-const TouchableWithoutFeedback = Platform.select({
-  ios: IosTouchableWithoutFeedback,
-  android: AndroidTouchableWithoutFeedback
-});
-
 interface PeriodDayProps {
   state?: DayState;
   marking?: MarkingProps;
@@ -224,26 +219,51 @@ export default class PeriodDay extends Component<PeriodDayProps> {
     const {theme, accessibilityLabel, testID} = this.props;
 
     // TODO: refactor - allow feedback for unmarked days
-    return (
-      <TouchableWithoutFeedback
-        testID={testID}
-        onPress={this.onPress}
-        onLongPress={this.onLongPress}
-        disabled={marking?.disableTouchEvent}
-        accessible
-        accessibilityRole={marking?.disableTouchEvent ? undefined : 'button'}
-        accessibilityLabel={accessibilityLabel}
-      >
-        <View style={this.style.wrapper}>
-          {fillers}
-          <View style={containerStyle}>
-            <Text allowFontScaling={false} style={textStyle}>
-              {String(this.props.children)}
-            </Text>
-            <Dot theme={theme} color={marking?.dotColor} marked={marking?.marked} />
+    if (Platform.OS === 'ios') {
+      return (
+        <IosTouchableWithoutFeedback
+          testID={testID}
+          onPress={this.onPress}
+          onLongPress={this.onLongPress}
+          disabled={marking?.disableTouchEvent}
+          accessible
+          accessibilityRole={marking?.disableTouchEvent ? undefined : 'button'}
+          accessibilityLabel={accessibilityLabel}
+        >
+          <View style={this.style.wrapper}>
+            {fillers}
+            <View style={containerStyle}>
+              <Text allowFontScaling={false} style={textStyle}>
+                {String(this.props.children)}
+              </Text>
+              <Dot theme={theme} color={marking?.dotColor} marked={marking?.marked} />
+            </View>
           </View>
-        </View>
-      </TouchableWithoutFeedback>
-    );
+        </IosTouchableWithoutFeedback>
+      );
+    } else {
+      return (
+        <AndroidTouchableWithoutFeedback
+          testID={testID}
+          onPress={this.onPress}
+          onLongPress={this.onLongPress}
+          disabled={marking?.disableTouchEvent}
+          accessible
+          accessibilityRole={marking?.disableTouchEvent ? undefined : 'button'}
+          accessibilityLabel={accessibilityLabel}
+          containerStyle={{width: '100%'}}
+        >
+          <View style={this.style.wrapper}>
+            {fillers}
+            <View style={containerStyle}>
+              <Text allowFontScaling={false} style={textStyle}>
+                {String(this.props.children)}
+              </Text>
+              <Dot theme={theme} color={marking?.dotColor} marked={marking?.marked} />
+            </View>
+          </View>
+        </AndroidTouchableWithoutFeedback>
+      );
+    }
   }
 }
