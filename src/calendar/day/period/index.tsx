@@ -8,7 +8,7 @@ import {TouchableWithoutFeedback as AndroidTouchableWithoutFeedback} from 'react
 // @ts-expect-error
 import {shouldUpdate} from '../../../component-updater';
 import * as defaultStyle from '../../../style';
-import styleConstructor from './style';
+import styleConstructor, {FILLER_HEIGHT} from './style';
 import Dot from '../dot';
 import {MarkingProps} from '../marking';
 import {Theme, DayState} from '../../../types';
@@ -153,7 +153,7 @@ export default class PeriodDay extends Component<PeriodDayProps> {
 
     if (marking) {
       containerStyle.push({
-        borderRadius: 17,
+        borderRadius: 19,
         overflow: 'hidden'
       });
 
@@ -203,6 +203,7 @@ export default class PeriodDay extends Component<PeriodDayProps> {
           backgroundColor: this.theme.calendarBackground
         };
         containerStyle.push({
+          width: FILLER_HEIGHT,
           backgroundColor: flags.endingDay.color
         });
       }
