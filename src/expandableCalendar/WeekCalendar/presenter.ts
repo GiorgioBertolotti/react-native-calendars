@@ -1,11 +1,8 @@
-import _ from 'lodash';
 import XDate from 'xdate';
 
 import React from 'react';
+import {FlatList} from 'react-native';
 
-// @ts-expect-error
-import {sameWeek} from '../../dateutils';
-// @ts-expect-error
 import {toMarkingFormat} from '../../interface';
 import {DateData} from '../../types';
 import {WeekCalendarProps} from './index';
@@ -21,19 +18,15 @@ class Presenter {
   private _applyAndroidRtlFix = commons.isAndroid && commons.isRTL;
   // On Android+RTL there's an initial scroll that cause issues
   private _firstAndroidRTLScrollIgnored = !this._applyAndroidRtlFix;
-  public list: React.RefObject<any> = React.createRef();
+  public list: React.RefObject<FlatList> = React.createRef();
 
   scrollToIndex = (animated: boolean) => {
     this.list?.current?.scrollToIndex({animated, index: NUMBER_OF_PAGES});
   };
 
-  isSameWeek = (date: Date, prevDate: Date, firstDay: number) => {
-    return sameWeek(date, prevDate, firstDay);
-  };
-
   // Events
   onDayPress = (context: any, value: DateData) => {
-    _.invoke(context, 'setDate', value.dateString, updateSources.DAY_PRESS);
+    context.setDate?.(value.dateString, updateSources.DAY_PRESS);
   };
 
   onScroll = ({context, updateState, x, page, items, width}: any) => {
@@ -46,8 +39,8 @@ class Presenter {
     const newPage = this._getNewPage(x, width);
 
     if (this._shouldUpdateState(page, newPage)) {
-      _.invoke(context, 'setDate', items[newPage], updateSources.WEEK_SCROLL);
-      const data = this._getItemsForPage(page, items);
+      context.setDate?.(items[newPage], updateSources.WEEK_SCROLL);
+      const data = this._getItemsForPage(newPage, items);
       updateState(data, newPage);
     }
   };
@@ -120,41 +113,41 @@ class Presenter {
     return page === 0;
   };
 
-  _isLastPage = (page: number, items: Date[]) => {
+  _isLastPage = (page: number, items: string[]) => {
     return page === items.length - 1;
   };
 
-  _getNexPageItems = (items: Date[]) => {
+  _getNextPageItems = (items: string[]) => {
     return items.map((_, i) => {
       const index = i <= NUMBER_OF_PAGES ? i + NUMBER_OF_PAGES : i;
       return items[index];
     });
   };
 
-  _getFirstPageItems = (items: Date[]) => {
+  _getFirstPageItems = (items: string[]) => {
     return items.map((_, i) => {
       const index = i >= NUMBER_OF_PAGES ? i - NUMBER_OF_PAGES : i;
       return items[index];
     });
   };
 
-  _mergeArraysFromEnd = (items: Date[], newArray: Date[]) => {
+  _mergeArraysFromEnd = (items: string[], newArray: string[]) => {
     for (let i = NUMBER_OF_PAGES + 1; i < items.length; i++) {
       items[i] = newArray[i];
     }
     return items;
   };
 
-  _mergeArraysFromTop = (items: Date[], newArray: Date[]) => {
+  _mergeArraysFromTop = (items: string[], newArray: string[]) => {
     for (let i = 0; i < NUMBER_OF_PAGES; i++) {
       items[i] = newArray[i];
     }
     return items;
   };
 
-  _getItemsForPage = (page: number, items: Date[]) => {
+  _getItemsForPage = (page: number, items: string[]) => {
     if (this._isLastPage(page, items)) {
-      return this._getNexPageItems(items);
+      return this._getNextPageItems(items);
     } else if (this._isFirstPage(page)) {
       return this._getFirstPageItems(items);
     }

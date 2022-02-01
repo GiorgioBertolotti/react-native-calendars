@@ -1,15 +1,11 @@
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import XDate from 'xdate';
 
 import React, {Component} from 'react';
 import {FlatList, Platform, Dimensions, View, ViewStyle, LayoutChangeEvent, FlatListProps} from 'react-native';
 
-// @ts-expect-error
-import {extractComponentProps} from '../component-updater';
-// @ts-expect-error
+import {extractComponentProps} from '../componentUpdater';
 import {xdateToData, parseDate} from '../interface';
-// @ts-expect-error
 import {page, sameDate} from '../dateutils';
 // @ts-expect-error
 import {STATIC_HEADER} from '../testIDs';
@@ -25,7 +21,7 @@ const CALENDAR_HEIGHT = 360;
 const PAST_SCROLL_RANGE = 50;
 const FUTURE_SCROLL_RANGE = 50;
 
-interface Props extends CalendarProps, FlatListProps<any> {
+export interface CalendarListProps extends CalendarProps, Omit<FlatListProps<any>, 'data' | 'renderItem'> {
   /** Max amount of months allowed to scroll to the past. Default = 50 */
   pastScrollRange?: number;
   /** Max amount of months allowed to scroll to the future. Default = 50 */
@@ -60,9 +56,9 @@ interface Props extends CalendarProps, FlatListProps<any> {
   onEndReached?: () => void;
   /** onLayout event */
   onLayout?: (event: LayoutChangeEvent) => void;
-  removeClippedSubviews: boolean;
+  removeClippedSubviews?: boolean;
+  testID?: string;
 }
-export type CalendarListProps = Props;
 
 type XDateAndBump = XDate & {propBump?: number};
 
@@ -78,9 +74,9 @@ type State = {
  * @extends: Calendar
  * @extendslink: docs/Calendar
  * @example: https://github.com/wix/react-native-calendars/blob/master/example/src/screens/calendarsList.js
- * @gif: https://github.com/wix/react-native-calendars/blob/master/demo/calendar-list.gif
+ * @gif: https://github.com/wix/react-native-calendars/blob/master/demo/assets/calendar-list.gif
  */
-class CalendarList extends Component<Props, State> {
+class CalendarList extends Component<CalendarListProps, State> {
   static displayName = 'CalendarList';
 
   static propTypes = {
@@ -138,7 +134,7 @@ class CalendarList extends Component<Props, State> {
     itemVisiblePercentThreshold: 20
   };
 
-  constructor(props: Props) {
+  constructor(props: CalendarListProps) {
     super(props);
 
     this.style = styleConstructor(props.theme);
@@ -174,7 +170,7 @@ class CalendarList extends Component<Props, State> {
     };
   }
 
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps: CalendarListProps) {
     const prevCurrent = parseDate(prevProps.current);
     const current = parseDate(this.props.current);
 
@@ -183,16 +179,16 @@ class CalendarList extends Component<Props, State> {
     }
   }
 
-  static getDerivedStateFromProps(_: Props, prevState: State) {
+  static getDerivedStateFromProps(_: CalendarListProps, prevState: State) {
     const rowClone = prevState.rows;
     const newRows = [];
 
     for (let i = 0; i < rowClone.length; i++) {
       let val: XDate | string = prevState.texts[i];
-      // @ts-ignore
+      // @ts-expect-error
       if (rowClone[i].getTime) {
         val = rowClone[i].clone();
-        // @ts-ignore
+        // @ts-expect-error
         val.propBump = rowClone[i].propBump ? rowClone[i].propBump + 1 : 1;
       }
       newRows.push(val);
@@ -225,7 +221,7 @@ class CalendarList extends Component<Props, State> {
     const {horizontal, calendarHeight = CALENDAR_HEIGHT, calendarWidth = CALENDAR_WIDTH, pastScrollRange = PAST_SCROLL_RANGE, animateScroll = false} = this.props;
     const month = parseDate(m);
     const scrollTo = month || this.state.openDate;
-    let diffMonths = Math.round(this.state.openDate.clone().setDate(1).diffMonths(scrollTo.clone().setDate(1)));
+    const diffMonths = Math.round(this.state.openDate.clone().setDate(1).diffMonths(scrollTo.clone().setDate(1)));
     const size = horizontal ? calendarWidth : calendarHeight;
     const scrollAmount = size * pastScrollRange + diffMonths * size;
 
@@ -245,7 +241,7 @@ class CalendarList extends Component<Props, State> {
 
   getMonthIndex(month: XDate) {
     const {pastScrollRange = PAST_SCROLL_RANGE} = this.props;
-    let diffMonths = this.state.openDate.diffMonths(month) + pastScrollRange;
+    const diffMonths = this.state.openDate.diffMonths(month) + pastScrollRange;
     return diffMonths;
   }
 
@@ -253,7 +249,7 @@ class CalendarList extends Component<Props, State> {
     this.updateMonth(this.state.currentMonth.clone().addMonths(count, true));
   };
 
-  updateMonth(day: XDate, doNotTriggerListeners = false) {
+  updateMonth(day: XDate) {
     if (day.toString('yyyy MM') === this.state.currentMonth.toString('yyyy MM')) {
       return;
     }
@@ -261,12 +257,9 @@ class CalendarList extends Component<Props, State> {
     this.setState({currentMonth: day.clone()}, () => {
       this.scrollToMonth(this.state.currentMonth);
 
-      if (!doNotTriggerListeners) {
-        const currMont = this.state.currentMonth.clone();
-
-        _.invoke(this.props, 'onMonthChange', xdateToData(currMont));
-        _.invoke(this.props, 'onVisibleMonthsChange', [xdateToData(currMont)]);
-      }
+      const currMont = this.state.currentMonth.clone();
+      this.props.onMonthChange?.(xdateToData(currMont));
+      this.props.onVisibleMonthsChange?.([xdateToData(currMont)]);
     });
   }
 
@@ -296,14 +289,15 @@ class CalendarList extends Component<Props, State> {
       }
       newrows.push(val);
       if (rowIsCloseToViewable(i, 0)) {
-        visibleMonths.push(xdateToData(val));
+        const v = (val instanceof XDate) ? val : new XDate(val);
+        visibleMonths.push(xdateToData(v));
       }
     }
 
-    _.invoke(this.props, 'onVisibleMonthsChange', visibleMonths);
+    this.props.onVisibleMonthsChange?.(visibleMonths);
 
     this.setState({
-      // @ts-ignore
+      // @ts-expect-error
       rows: newrows,
       currentMonth: parseDate(visibleMonths[0])
     });
@@ -353,7 +347,7 @@ class CalendarList extends Component<Props, State> {
         <FlatList
           ref={this.list}
           style={[this.style.container, style]}
-          // @ts-ignore
+          // @ts-expect-error
           initialListSize={pastScrollRange + futureScrollRange + 1} // ListView deprecated
           data={this.state.rows}
           renderItem={this.renderItem}

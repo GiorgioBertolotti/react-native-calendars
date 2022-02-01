@@ -1,15 +1,14 @@
-import _ from 'lodash';
+import values from 'lodash/values';
 import PropTypes from 'prop-types';
 
 import React, {Component, Fragment} from 'react';
 import {Platform, TouchableOpacity as IosTouchableOpacity, Text, View} from 'react-native';
 import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 
-import {Theme, DateData, DayState} from '../../../types';
-// @ts-expect-error
-import {shouldUpdate} from '../../../component-updater';
+import {Theme, DayState, MarkingTypes, DateData} from '../../../types';
+import {shouldUpdate} from '../../../componentUpdater';
 import styleConstructor from './style';
-import Marking, {MarkingTypes, MarkingProps} from '../marking';
+import Marking, {MarkingProps} from '../marking';
 
 const TouchableOpacity = Platform.select({
   ios: IosTouchableOpacity,
@@ -25,11 +24,11 @@ export interface BasicDayProps {
   /** Theme object */
   theme?: Theme;
   /** onPress callback */
-  onPress?: (date: DateData) => void;
+  onPress?: (date?: DateData) => void;
   /** onLongPress callback */
-  onLongPress?: (date: Date) => void;
+  onLongPress?: (date?: DateData) => void;
   /** The date to return from press callbacks */
-  date?: Date;
+  date?: DateData;
   /** Disable all touch events for disabled days. can be override with disableTouchEvent in markedDates*/
   disableAllTouchEventsForDisabledDays?: boolean;
   /** Disable all touch events for inactive days. can be override with disableTouchEvent in markedDates*/
@@ -41,14 +40,14 @@ export interface BasicDayProps {
 }
 
 export default class BasicDay extends Component<BasicDayProps> {
-  static displayName = 'IGNORE';
+  static displayName = 'BasicDay';
 
   static propTypes = {
     state: PropTypes.oneOf(['selected', 'disabled', 'inactive', 'today', '']),
     /** The marking object */
     marking: PropTypes.any,
     /** Date marking style [simple/period/multi-dot/multi-period]. Default = 'simple' */
-    markingType: PropTypes.oneOf(_.values(Marking.markingTypes)),
+    markingType: PropTypes.oneOf(values(Marking.markings)),
     /** Theme object */
     theme: PropTypes.object,
     /** onPress callback */
@@ -79,11 +78,11 @@ export default class BasicDay extends Component<BasicDayProps> {
   }
 
   onPress = () => {
-    _.invoke(this.props, 'onPress', this.props.date);
+    this.props.onPress?.(this.props.date);
   };
 
   onLongPress = () => {
-    _.invoke(this.props, 'onLongPress', this.props.date);
+    this.props.onLongPress?.(this.props.date);
   };
 
   get marking() {
@@ -122,15 +121,15 @@ export default class BasicDay extends Component<BasicDayProps> {
   }
 
   isMultiDot() {
-    return this.props.markingType === Marking.markingTypes.MULTI_DOT;
+    return this.props.markingType === Marking.markings.MULTI_DOT;
   }
 
   isMultiPeriod() {
-    return this.props.markingType === Marking.markingTypes.MULTI_PERIOD;
+    return this.props.markingType === Marking.markings.MULTI_PERIOD;
   }
 
   isCustom() {
-    return this.props.markingType === Marking.markingTypes.CUSTOM;
+    return this.props.markingType === Marking.markings.CUSTOM;
   }
 
   getContainerStyle() {

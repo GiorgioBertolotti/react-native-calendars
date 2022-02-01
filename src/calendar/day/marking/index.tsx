@@ -1,15 +1,15 @@
-import _ from 'lodash';
+import filter from 'lodash/filter';
 
 import React, {Component} from 'react';
-import {View, ViewStyle, TextStyle} from 'react-native';
+import {View, ViewStyle, TextStyle, StyleProp} from 'react-native';
 
-// @ts-expect-error
-import {shouldUpdate, extractComponentProps} from '../../../component-updater';
+import {Theme, MarkingTypes} from '../../../types';
+import {shouldUpdate, extractComponentProps} from '../../../componentUpdater';
 import styleConstructor from './style';
 import Dot, {DotProps} from '../dot';
-import {Theme} from '../../../types';
 
-export enum MarkingTypes {
+
+export enum Markings {
   DOT = 'dot',
   MULTI_DOT = 'multi-dot',
   PERIOD = 'period',
@@ -18,8 +18,8 @@ export enum MarkingTypes {
 }
 
 type CustomStyle = {
-  container?: ViewStyle,
-  text?: TextStyle
+  container?: ViewStyle;
+  text?: TextStyle;
 }
 
 type DOT = {
@@ -44,8 +44,11 @@ export interface MarkingProps extends DotProps {
   inactive?: boolean;
   disableTouchEvent?: boolean;
   activeOpacity?: number;
+  textColor?: string;
   selectedColor?: string;
   selectedTextColor?: string;
+  customTextStyle?: StyleProp<TextStyle>;
+  customContainerStyle?: StyleProp<ViewStyle>;
   dotColor?: string;
   //multi-dot
   dots?: DOT[];
@@ -58,9 +61,9 @@ export interface MarkingProps extends DotProps {
 }
 
 export default class Marking extends Component<MarkingProps> {
-  static displayName = 'IGNORE';
+  static displayName = 'Marking';
 
-  static markingTypes = MarkingTypes;
+  static markings = Markings;
   
   style: any;
   
@@ -93,10 +96,10 @@ export default class Marking extends Component<MarkingProps> {
 
     if (items && Array.isArray(items) && items.length > 0) {
       // Filter out items so that we process only those which have color property
-      const validItems = _.filter(items, function(o: DOT | PERIOD) { return o.color; });
+      const validItems = filter(items, function(o: DOT | PERIOD) { return o.color; });
 
       return validItems.map((item, index) => {
-        return type === MarkingTypes.MULTI_DOT ? this.renderDot(index, item) : this.renderPeriod(index, item);
+        return type === Markings.MULTI_DOT ? this.renderDot(index, item) : this.renderPeriod(index, item);
       });
     }
   }
@@ -104,16 +107,16 @@ export default class Marking extends Component<MarkingProps> {
   renderMarkingByType() {
     const {type, dots, periods} = this.props;
     switch (type) {
-      case MarkingTypes.MULTI_DOT:
+      case Markings.MULTI_DOT:
         return this.renderMultiMarkings(this.style.dots, dots);
-      case MarkingTypes.MULTI_PERIOD:
+      case Markings.MULTI_PERIOD:
         return this.renderMultiMarkings(this.style.periods, periods);
       default:
         return this.renderDot();
     }
   }
 
-  renderMultiMarkings(containerStyle: Object, items?: DOT[] | PERIOD[]) {
+  renderMultiMarkings(containerStyle: object, items?: DOT[] | PERIOD[]) {
     return <View style={containerStyle}>{this.getItems(items)}</View>;
   }
 

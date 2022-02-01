@@ -3,7 +3,6 @@ import * as defaultStyle from '../style';
 import platformStyles from './platform-style';
 import {Theme} from '../types';
 
-
 export default function styleConstructor(theme: Theme = {}) {
   const appStyle = {...defaultStyle, ...theme};
   const {knob, weekdays} = platformStyles(appStyle);
@@ -13,7 +12,7 @@ export default function styleConstructor(theme: Theme = {}) {
       flex: 1,
       overflow: 'hidden'
     },
-    animatedContiner: {
+    animatedContainer: {
       flex: 1
     },
     knob,
@@ -50,8 +49,10 @@ export default function styleConstructor(theme: Theme = {}) {
     },
     scrollPadStyle: {
       position: 'absolute',
-      width: 80,
+      width: '100%',
+      alignSelf: 'center'
     },
-    ...(theme.stylesheet?.agenda?.main || {})
+    // @ts-expect-error
+    ...(theme['stylesheet.agenda.main'] || {})
   });
 }

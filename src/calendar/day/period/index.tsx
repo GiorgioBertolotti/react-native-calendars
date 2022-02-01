@@ -1,31 +1,31 @@
-import _ from 'lodash';
+import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 
 import React, {Component} from 'react';
 import {Platform, TouchableWithoutFeedback as IosTouchableWithoutFeedback, Text, View, ViewStyle} from 'react-native';
 import {TouchableWithoutFeedback as AndroidTouchableWithoutFeedback} from 'react-native-gesture-handler';
 
-// @ts-expect-error
-import {shouldUpdate} from '../../../component-updater';
+import {Theme, DayState, DateData} from '../../../types';
+import {shouldUpdate} from '../../../componentUpdater';
 import * as defaultStyle from '../../../style';
 import styleConstructor, {FILLER_HEIGHT} from './style';
 import Dot from '../dot';
 import {MarkingProps} from '../marking';
-import {Theme, DayState} from '../../../types';
+
 
 interface PeriodDayProps {
   state?: DayState;
   marking?: MarkingProps;
   theme?: Theme;
-  onPress?: (date?: Date) => void;
-  onLongPress?: (date?: Date) => void;
-  date?: Date;
+  onPress?: (date?: DateData) => void;
+  onLongPress?: (date?: DateData) => void;
+  date?: DateData;
   accessibilityLabel?: string;
   testID?: string;
 }
 
 export default class PeriodDay extends Component<PeriodDayProps> {
-  static displayName = 'IGNORE';
+  static displayName = 'PeriodDay';
 
   static propTypes = {
     state: PropTypes.oneOf(['selected', 'disabled', 'inactive', 'today', '']),
@@ -58,7 +58,7 @@ export default class PeriodDay extends Component<PeriodDayProps> {
 
   shouldComponentUpdate(nextProps: PeriodDayProps) {
     const newMarkingStyle = this.getDrawingStyle(nextProps.marking);
-    if (!_.isEqual(this.markingStyle, newMarkingStyle)) {
+    if (!isEqual(this.markingStyle, newMarkingStyle)) {
       this.markingStyle = newMarkingStyle;
       return true;
     }

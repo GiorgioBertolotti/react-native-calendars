@@ -1,16 +1,24 @@
-import _ from 'lodash';
+import includes from 'lodash/includes';
 import PropTypes from 'prop-types';
 import memoize from 'memoize-one';
 import XDate from 'xdate';
 
 import React, {Component, Fragment, ReactNode} from 'react';
-import {ActivityIndicator, Platform, View, Text, TouchableOpacity as IosTouchableOpacity, Image, StyleProp, ViewStyle, AccessibilityActionEvent, ColorValue} from 'react-native';
+import {
+  ActivityIndicator,
+  Platform,
+  View,
+  Text,
+  TouchableOpacity as IosTouchableOpacity,
+  Image,
+  StyleProp,
+  ViewStyle,
+  AccessibilityActionEvent,
+  ColorValue
+} from 'react-native';
 import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
-
-// @ts-expect-error
-import {shouldUpdate} from '../../component-updater';
-// @ts-expect-error
-import {weekDayNames} from '../../dateutils';
+import {shouldUpdate} from '../../componentUpdater';
+import {formatNumbers, weekDayNames} from '../../dateutils';
 import {
   CHANGE_MONTH_LEFT_ARROW,
   CHANGE_MONTH_RIGHT_ARROW,
@@ -24,10 +32,12 @@ import {Theme, Direction} from '../../types';
 
 const TouchableOpacity = Platform.select({
   ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   android: AndroidTouchableOpacity
 });
 
-interface Props {
+export interface CalendarHeaderProps {
   theme?: Theme;
   firstDay?: number;
   displayLoadingIndicator?: boolean;
@@ -52,8 +62,10 @@ interface Props {
   disableArrowRight?: boolean;
   /** Apply custom disable color to selected day indexes */
   disabledDaysIndexes?: number[];
-  /** Replace default month and year title with custom one. the function receive a date as parameter */
+  /** Replace default title with custom one. the function receive a date as parameter */
   renderHeader?: (date?: XDate) => ReactNode;
+  /** Replace default title with custom element */
+  customHeaderTitle?: JSX.Element;
   /** Provide aria-level for calendar heading for proper accessibility when used with web (react-native-web) */
   webAriaLevel?: number;
   testID?: string;
@@ -61,10 +73,9 @@ interface Props {
   accessibilityElementsHidden?: boolean;
   importantForAccessibility?: 'auto' | 'yes' | 'no' | 'no-hide-descendants';
 }
-export type CalendarHeaderProps = Props;
 
-class CalendarHeader extends Component<Props> {
-  static displayName = 'IGNORE';
+class CalendarHeader extends Component<CalendarHeaderProps> {
+  static displayName = 'CalendarHeader';
 
   static propTypes = {
     theme: PropTypes.object,
@@ -91,8 +102,10 @@ class CalendarHeader extends Component<Props> {
     disableArrowRight: PropTypes.bool,
     /** Apply custom disable color to selected day indexes */
     disabledDaysIndexes: PropTypes.arrayOf(PropTypes.number),
-    /** Replace default month and year title with custom one. the function receive a date as parameter. */
+    /** Replace default title with custom one. the function receive a date as parameter */
     renderHeader: PropTypes.any,
+    /** Replace default title with custom element */
+    customHeaderTitle: PropTypes.any,
     /** Provide aria-level for calendar heading for proper accessibility when used with web (react-native-web) */
     webAriaLevel: PropTypes.number
   };
@@ -103,13 +116,13 @@ class CalendarHeader extends Component<Props> {
   };
   style: any;
 
-  constructor(props: Props) {
+  constructor(props: CalendarHeaderProps) {
     super(props);
 
     this.style = styleConstructor(props.theme);
   }
 
-  shouldComponentUpdate(nextProps: Props) {
+  shouldComponentUpdate(nextProps: CalendarHeaderProps) {
     if (nextProps.month?.toString('yyyy MM') !== this.props.month?.toString('yyyy MM')) {
       return true;
     }
@@ -121,7 +134,9 @@ class CalendarHeader extends Component<Props> {
       'monthFormat',
       'renderArrow',
       'disableArrowLeft',
-      'disableArrowRight'
+      'disableArrowRight',
+      'renderHeader',
+      'customHeaderTitle'
     ]);
   }
 
@@ -161,7 +176,7 @@ class CalendarHeader extends Component<Props> {
     return weekDaysNames.map((day: string, idx: number) => {
       const dayStyle = [this.style.dayHeader];
 
-      if (_.includes(disabledDaysIndexes, idx)) {
+      if (includes(disabledDaysIndexes, idx)) {
         dayStyle.push(this.style.disabledDayHeader);
       }
 
@@ -178,11 +193,15 @@ class CalendarHeader extends Component<Props> {
   });
 
   renderHeader = () => {
-    const {renderHeader, month, monthFormat, testID, webAriaLevel} = this.props;
+    const {customHeaderTitle, renderHeader, month, monthFormat, testID, webAriaLevel} = this.props;
     const webProps = Platform.OS === 'web' ? {'aria-level': webAriaLevel} : {};
 
     if (renderHeader) {
       return renderHeader(month);
+    }
+
+    if (customHeaderTitle) {
+      return customHeaderTitle;
     }
 
     return (
@@ -193,7 +212,7 @@ class CalendarHeader extends Component<Props> {
           testID={testID ? `${HEADER_MONTH_NAME}-${testID}` : HEADER_MONTH_NAME}
           {...webProps}
         >
-          {month?.toString(monthFormat)}
+          {formatNumbers(month?.toString(monthFormat))}
         </Text>
       </Fragment>
     );
