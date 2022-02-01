@@ -1,7 +1,15 @@
 import React, {Component} from 'react';
-import {Alert, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {Alert, StyleSheet, Text, View, TouchableOpacity as IosTouchableOpacity, Platform} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 import {Agenda, DateData, AgendaEntry, AgendaSchedule} from 'react-native-calendars';
 import testIDs from '../testIDs';
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  android: AndroidTouchableOpacity
+});
 
 interface State {
   items?: AgendaSchedule;

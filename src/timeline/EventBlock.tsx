@@ -1,6 +1,14 @@
 import React, {useCallback, useMemo} from 'react';
-import {View, Text, TextStyle, TouchableOpacity, ViewStyle} from 'react-native';
+import {View, Text, TextStyle, TouchableOpacity as IosTouchableOpacity, Platform, ViewStyle} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 import XDate from 'xdate';
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  android: AndroidTouchableOpacity
+});
 
 export interface Event {
   id?: string;

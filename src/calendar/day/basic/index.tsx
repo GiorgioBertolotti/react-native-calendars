@@ -12,6 +12,8 @@ import Marking, {MarkingProps} from '../marking';
 
 const TouchableOpacity = Platform.select({
   ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   android: AndroidTouchableOpacity
 });
 

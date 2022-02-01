@@ -1,7 +1,15 @@
 import React, {useState, Fragment, useCallback} from 'react';
-import {StyleSheet, View, ScrollView, Text, TouchableOpacity} from 'react-native';
+import {StyleSheet, View, ScrollView, Text, TouchableOpacity as IosTouchableOpacity, Platform} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 import {Calendar, CalendarProps} from 'react-native-calendars';
 import testIDs from '../testIDs';
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  android: AndroidTouchableOpacity
+});
 
 const INITIAL_DATE = '2020-02-02';
 

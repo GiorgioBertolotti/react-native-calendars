@@ -1,8 +1,16 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, View, ScrollView, TouchableOpacity, Text, Image} from 'react-native';
+import {Platform, StyleSheet, View, ScrollView, TouchableOpacity as IosTouchableOpacity, Text, Image} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import testIDs from '../testIDs';
 import appIcon from '../img/app-icon-120x120.png';
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  android: AndroidTouchableOpacity
+});
 
 interface Props {
   componentId?: string;

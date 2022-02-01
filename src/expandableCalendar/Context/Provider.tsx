@@ -16,6 +16,8 @@ const TOP_POSITION = 65;
 
 const TouchableOpacity = Platform.select({
   ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
   android: AndroidTouchableOpacity
 });
 

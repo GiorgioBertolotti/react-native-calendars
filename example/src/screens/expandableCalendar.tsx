@@ -1,8 +1,16 @@
 import isEmpty from 'lodash/isEmpty';
 import React, {Component, useCallback} from 'react';
-import {Platform, StyleSheet, Alert, View, Text, TouchableOpacity, Button} from 'react-native';
+import {Platform, StyleSheet, Alert, View, Text, TouchableOpacity as IosTouchableOpacity, Button} from 'react-native';
+import {TouchableOpacity as AndroidTouchableOpacity} from 'react-native-gesture-handler';
 import {ExpandableCalendar, AgendaList, CalendarProvider, WeekCalendar} from 'react-native-calendars';
 import testIDs from '../testIDs';
+
+const TouchableOpacity = Platform.select({
+  ios: IosTouchableOpacity,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+  // @ts-ignore
+  android: AndroidTouchableOpacity
+});
 
 const today = new Date().toISOString().split('T')[0];
 const fastDate = getPastDate(3);
